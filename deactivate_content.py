@@ -4,6 +4,10 @@ Amazon Kids Plus Content Deactivator
 
 This script automates the process of deactivating all content on the Amazon Kids
 parent dashboard using Selenium WebDriver.
+
+IMPORTANT: This script contains placeholder CSS selectors and button text that may
+need to be customized based on Amazon's current website structure. Before using,
+inspect the actual Amazon Kids dashboard and update the selectors as needed.
 """
 
 import os
@@ -45,6 +49,11 @@ class AmazonKidsContentDeactivator:
         self.page_load_timeout = int(os.getenv('PAGE_LOAD_TIMEOUT', '30'))
         self.element_wait_timeout = int(os.getenv('ELEMENT_WAIT_TIMEOUT', '10'))
         self.headless = os.getenv('HEADLESS', 'false').lower() == 'true'
+        self.max_iterations = int(os.getenv('MAX_ITERATIONS', '100'))
+        
+        # Customizable selectors - update these based on actual Amazon page structure
+        self.checkbox_selector = os.getenv('CHECKBOX_SELECTOR', 'input[type="checkbox"]:checked')
+        self.content_link_text = os.getenv('CONTENT_LINK_TEXT', 'Manage Content')
         
         if not self.email or not self.password:
             raise ValueError("AMAZON_EMAIL and AMAZON_PASSWORD must be set in .env file")
@@ -119,25 +128,36 @@ class AmazonKidsContentDeactivator:
         """Navigate to the content management page where items can be unchecked."""
         logger.info("Navigating to content management page...")
         
-        # This URL structure may vary - adjust based on actual Amazon Kids dashboard
-        # Common paths: manage content, parental controls, content settings
+        # NOTE: This navigation logic is a placeholder and may need customization
+        # based on the actual Amazon Kids dashboard structure.
+        # 
+        # To customize:
+        # 1. Manually navigate to the content management page
+        # 2. Use browser DevTools to inspect the navigation elements
+        # 3. Update the selector or use direct URL navigation
+        
         try:
-            # Try to find and click on content management link
-            # This is a placeholder - actual selectors need to be determined
-            # from the real Amazon Kids dashboard
+            # Try to find and click on content management link using configured text
             content_link = self.wait.until(
-                EC.element_to_be_clickable((By.LINK_TEXT, 'Manage Content'))
+                EC.element_to_be_clickable((By.LINK_TEXT, self.content_link_text))
             )
             content_link.click()
             time.sleep(2)
         except TimeoutException:
-            logger.warning("Could not find 'Manage Content' link, you may need to navigate manually")
-            # Alternative: direct URL navigation
-            # self.driver.get('https://www.amazon.com/freeTime/manage-content')
+            logger.warning(f"Could not find '{self.content_link_text}' link")
+            logger.warning("You may need to:")
+            logger.warning("1. Navigate manually to the content page, or")
+            logger.warning("2. Update CONTENT_LINK_TEXT in .env, or")
+            logger.warning("3. Modify the navigation logic in the script")
+            # The script will continue and try to work with whatever page is loaded
             
     def uncheck_all_visible_content(self) -> int:
         """
         Uncheck all currently visible checked checkboxes.
+        
+        NOTE: The checkbox selector is configurable via CHECKBOX_SELECTOR environment
+        variable. The default 'input[type="checkbox"]:checked' may need to be updated
+        based on Amazon's actual page structure.
         
         Returns:
             int: Number of checkboxes unchecked in this iteration
@@ -145,15 +165,18 @@ class AmazonKidsContentDeactivator:
         unchecked_in_iteration = 0
         
         try:
-            # Find all checked checkboxes
-            # Common selectors: input[type="checkbox"]:checked, .checked, etc.
-            # Adjust these selectors based on actual page structure
+            # Find all checked checkboxes using configured selector
             checked_boxes = self.driver.find_elements(
                 By.CSS_SELECTOR, 
-                'input[type="checkbox"]:checked'
+                self.checkbox_selector
             )
             
             logger.info(f"Found {len(checked_boxes)} checked items")
+            
+            if len(checked_boxes) == 0:
+                logger.warning(f"No checkboxes found with selector: {self.checkbox_selector}")
+                logger.warning("You may need to update CHECKBOX_SELECTOR in .env")
+                logger.warning("Use browser DevTools to inspect the checkbox elements")
             
             for checkbox in checked_boxes:
                 try:
@@ -209,18 +232,25 @@ class AmazonKidsContentDeactivator:
         """
         Click the 'Load More' or 'Show More' button if it exists.
         
+        NOTE: Button selectors are configurable but default to common patterns.
+        If the script doesn't find the button, inspect Amazon's page and update
+        the selectors in this method.
+        
         Returns:
             bool: True if button was clicked, False otherwise
         """
         try:
             # Common button texts and selectors
+            # These are generic patterns - may need customization for Amazon's specific implementation
             button_selectors = [
                 (By.XPATH, "//button[contains(text(), 'Load More')]"),
                 (By.XPATH, "//button[contains(text(), 'Show More')]"),
                 (By.XPATH, "//button[contains(text(), 'More Results')]"),
+                (By.XPATH, "//a[contains(text(), 'Load More')]"),
                 (By.CSS_SELECTOR, "button.load-more"),
                 (By.CSS_SELECTOR, "button.show-more"),
                 (By.CSS_SELECTOR, "a.load-more"),
+                # Add more selectors here based on actual Amazon implementation
             ]
             
             for by, selector in button_selectors:
@@ -259,9 +289,13 @@ class AmazonKidsContentDeactivator:
         """Main method to deactivate all content on the dashboard."""
         logger.info("Starting content deactivation process...")
         
-        max_iterations = 100  # Safety limit to prevent infinite loops
+        # Use configured max iterations (default 100, configurable via MAX_ITERATIONS env var)
+        max_iterations = self.max_iterations
         iteration = 0
         consecutive_no_changes = 0
+        
+        logger.info(f"Maximum iterations set to: {max_iterations}")
+        logger.info(f"Using checkbox selector: {self.checkbox_selector}")
         
         while iteration < max_iterations:
             iteration += 1

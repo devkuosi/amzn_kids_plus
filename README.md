@@ -52,6 +52,26 @@ The `.env` file supports the following options:
 | `PAGE_LOAD_TIMEOUT` | Maximum time to wait for page loads (seconds) | 30 |
 | `ELEMENT_WAIT_TIMEOUT` | Maximum time to wait for elements (seconds) | 10 |
 | `HEADLESS` | Run browser in headless mode (true/false) | false |
+| `MAX_ITERATIONS` | Maximum number of scroll/load iterations | 100 |
+| `CHECKBOX_SELECTOR` | CSS selector for checkboxes to uncheck | `input[type="checkbox"]:checked` |
+| `CONTENT_LINK_TEXT` | Text of link to content management page | Manage Content |
+
+### Customizing Selectors
+
+**IMPORTANT**: The default CSS selectors are generic and may not match Amazon's actual page structure. Before using this script:
+
+1. Open Amazon Kids dashboard in Chrome
+2. Right-click on a checkbox and select "Inspect"
+3. Find the appropriate CSS selector for checked checkboxes
+4. Update `CHECKBOX_SELECTOR` in your `.env` file
+
+Example:
+```bash
+# If Amazon uses a custom checkbox class
+CHECKBOX_SELECTOR=.content-item.selected input[type="checkbox"]
+```
+
+Similarly, if the "Manage Content" link text differs, update `CONTENT_LINK_TEXT` or modify the navigation logic in the script.
 
 ## Usage
 
