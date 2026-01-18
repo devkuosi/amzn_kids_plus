@@ -2,6 +2,12 @@
 
 Automatically deactivate all contents on the Amazon Kids parent dashboard using Selenium automation.
 
+## 📚 Documentation
+
+- **[Quick Start Guide](QUICKSTART.md)** - Get started in 5 minutes
+- **[Usage Examples](USAGE_EXAMPLES.md)** - Common scenarios and examples
+- **[Developer Guide](DEVELOPER_GUIDE.md)** - Customize for Amazon's website structure
+
 ## Overview
 
 This Python script uses Selenium WebDriver to automate the process of unchecking all content items on the Amazon Kids parent dashboard. It:
